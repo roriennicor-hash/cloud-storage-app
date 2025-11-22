@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cloud Storage App</title>
+</head>
+<body>
+  <h1>Upload an Image to Cloudinary</h1>
+  <form id="uploadForm">
+    <input type="file" name="image" id="imageInput" accept="image/*" required />
+    <button type="submit">Upload</button>
+  </form>
+  <p id="status"></p>
+  <img id="uploadedImage" src="" alt="" style="max-width: 300px; display: none; margin-top: 20px;" />
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const status = document.getElementById('status');
+    const uploadedImage = document.getElementById('uploadedImage');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('imageInput');
+      const formData = new FormData();
+      formData.append('image', fileInput.files[0]);
+
+      status.textContent = 'Uploading...';
+      uploadedImage.style.display = 'none';
+
+      try {
+        const res = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          status.textContent = data.message;
+          uploadedImage.src = data.fileUrl;
+          uploadedImage.style.display = 'block';
+        } else {
+          status.textContent = data.message || 'Upload failed';
+        }
+      } catch (err) {
+        status.textContent = 'Error uploading file';
+      }
+    });
+  </script>
+</body>
+</html>
