@@ -3,6 +3,7 @@ const express = require('express');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,23 +19,23 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'uploads', // Cloudinary folder
+    folder: 'uploads',
     allowed_formats: ['jpg', 'jpeg', 'png', 'gif']
   }
 });
 
 const parser = multer({ storage: storage });
 
-// Middleware to parse form data
+// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public'))); // Serve HTML files
 
-// Route: test server
+// Routes
 app.get('/', (req, res) => {
-  res.send('Cloud Storage App is running!');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Route: upload file
 app.post('/upload', parser.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
@@ -45,6 +46,7 @@ app.post('/upload', parser.single('image'), (req, res) => {
   });
 });
 
+// Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
